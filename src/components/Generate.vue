@@ -5,6 +5,11 @@
         生成密钥
       </n-text>
     </n-h1>
+    <n-alert title="Tips" type="default">
+      个人资料只用于生成密钥，以下资料不填也可以生成密钥。<br>
+      密码如果没设定的话，密钥默认处于解锁状态，解密的时候不需要输入密码。（不太推荐）
+    </n-alert>
+    <br>
     <div>
       <n-h5>用户名:</n-h5>
       <n-input v-model:value="username" id="username" type="text" placeholder="请输入用户名" />
@@ -36,7 +41,7 @@
 
 <script>
   import * as openpgp from 'openpgp';
-  import { NInput, NH1, NH5, NText, NButton, NDivider } from 'naive-ui';
+  import { NInput, NH1, NH5, NText, NButton, NDivider, NAlert } from 'naive-ui';
 
   export default {
     components: {
@@ -45,7 +50,8 @@
       NH5,
       NText,
       NButton,
-      NDivider
+      NDivider,
+      NAlert,
     },
     data() {
       return {
