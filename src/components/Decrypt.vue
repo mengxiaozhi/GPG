@@ -42,6 +42,7 @@
 </template>
 
 <script>
+    import { ref } from 'vue';
     import * as openpgp from 'openpgp';
     import { NInput, NH1, NH5, NText, NButton, NDivider } from 'naive-ui';
 
@@ -52,48 +53,47 @@
             NH5,
             NText,
             NButton,
-            NDivider
+            NDivider,
         },
-        data() {
-            return {
-                privateKey: '',
-                passphrase: '',
-                encryptedTextForDecryption: '',
-                decryptedText: ''
-            };
-        },
-        methods: {
-            async decrypt() {
-                if (!this.privateKey || !this.encryptedTextForDecryption) {
+        setup() {
+            // 定义响应式变量
+            const privateKey = ref('');
+            const passphrase = ref('');
+            const encryptedTextForDecryption = ref('');
+            const decryptedText = ref('');
+
+            // 解密函数
+            const decrypt = async () => {
+                if (!privateKey.value || !encryptedTextForDecryption.value) {
                     alert('请填写私钥和加密文本');
                     return;
                 }
 
                 try {
                     // 读取私钥
-                    const privateKeyObject = await openpgp.readPrivateKey({ armoredKey: this.privateKey });
+                    const privateKeyObject = await openpgp.readPrivateKey({ armoredKey: privateKey.value });
 
                     // 解锁私钥
-                    let privateKey;
-                    if (this.passphrase) {
-                        privateKey = await openpgp.decryptKey({
+                    let privateKeyDecrypted;
+                    if (passphrase.value) {
+                        privateKeyDecrypted = await openpgp.decryptKey({
                             privateKey: privateKeyObject,
-                            passphrase: this.passphrase
+                            passphrase: passphrase.value
                         });
                     } else {
-                        privateKey = privateKeyObject; // 如果没有密码，直接使用私钥对象
+                        privateKeyDecrypted = privateKeyObject; // 如果没有密码，直接使用私钥对象
                     }
 
                     // 读取加密消息
-                    const message = await openpgp.readMessage({ armoredMessage: this.encryptedTextForDecryption });
+                    const message = await openpgp.readMessage({ armoredMessage: encryptedTextForDecryption.value });
 
                     // 解密消息
                     const { data: decrypted, signatures } = await openpgp.decrypt({
                         message,
-                        decryptionKeys: privateKey // 使用解锁后的私钥
+                        decryptionKeys: privateKeyDecrypted // 使用解锁后的私钥
                     });
 
-                    this.decryptedText = decrypted;
+                    decryptedText.value = decrypted;
 
                     // 检查签名有效性（如果消息是签名的）
                     if (signatures.length > 0) {
@@ -108,7 +108,16 @@
                     console.error('解密失败:', error);
                     alert('解密失败，请检查私钥、密码和加密文本');
                 }
-            }
+            };
+
+            // 返回要暴露的变量和方法
+            return {
+                privateKey,
+                passphrase,
+                encryptedTextForDecryption,
+                decryptedText,
+                decrypt
+            };
         }
     };
 </script>

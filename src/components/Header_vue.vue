@@ -36,9 +36,8 @@
                 </n-icon>
             </n-button>
             <n-drawer v-model:show="active" :width="502" :placement="placement">
-                <n-drawer-content>
-                    <nav class="px-8 py-8">
-                        <n-h2 style="color: #5DAC81;">功能选单</n-h2>
+                <n-drawer-content title="功能选单">
+                    <nav class="px-3 py-3" style="color: #5DAC81;">
                         <div>
                             <router-link to="/pgp/generate">
                                 <a class="text-lg underline underline-offset-4" rel="ugc">
@@ -66,31 +65,52 @@
         </div>
     </header>
 </template>
-<script>
-    import { defineComponent, ref } from "vue";
-    import { NImage, NH2, NDrawer, NButton, NIcon } from 'naive-ui';
 
-    export default defineComponent({
-        components: {
-            NImage,
-            NH2,
-            NDrawer,
-            NButton,
-            NIcon
-        },
-        setup() {
-            const active = ref(false);
-            const placement = ref("right");
-            const activate = (place) => {
-                active.value = true;
-                placement.value = place;
-            };
-            return {
-                active,
-                placement,
-                activate
-            };
-        }
-    });
+<script>
+import { defineComponent, ref, onMounted, onUnmounted } from "vue";
+import { useRouter } from 'vue-router';
+import { NImage, NH2, NDrawer, NButton, NIcon, NDrawerContent } from 'naive-ui';
+
+export default defineComponent({
+    components: {
+        NImage,
+        NH2,
+        NDrawer,
+        NButton,
+        NIcon,
+        NDrawerContent,
+    },
+    setup() {
+        const active = ref(false);
+        const placement = ref("right");
+        const router = useRouter();
+
+        //抽屜
+        const activate = (place) => {
+            active.value = true;
+            placement.value = place;
+        };
+
+        // 监听路由变化以关闭抽屉
+        const handleRouteChange = () => {
+            active.value = false;
+        };
+
+        onMounted(() => {
+            router.afterEach(handleRouteChange);
+        });
+
+        onUnmounted(() => {
+            router.afterEach(handleRouteChange); // 清理副作用
+        });
+
+        return {
+            active,
+            placement,
+            activate
+        };
+    }
+});
 </script>
+
 <style></style>

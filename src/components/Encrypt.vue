@@ -35,6 +35,7 @@
 </template>
 
 <script>
+    import { ref } from 'vue';
     import * as openpgp from 'openpgp';
     import { NInput, NH1, NH5, NText, NButton, NDivider } from 'naive-ui';
 
@@ -45,29 +46,28 @@
             NH5,
             NText,
             NButton,
-            NDivider
+            NDivider,
         },
-        data() {
-            return {
-                plaintext: '',
-                encryptedText: '',
-                publicKey: '' // 存储用户输入的公钥
-            };
-        },
-        methods: {
-            async encrypt() {
-                if (!this.publicKey) {
+        setup() {
+            // 定义响应式变量
+            const plaintext = ref('');
+            const encryptedText = ref('');
+            const publicKey = ref('');
+
+            // 加密函数
+            const encrypt = async () => {
+                if (!publicKey.value) {
                     alert('请先输入公钥');
                     return;
                 }
 
                 try {
                     // 读取公钥
-                    const publicKeys = await openpgp.readKey({ armoredKey: this.publicKey });
+                    const publicKeys = await openpgp.readKey({ armoredKey: publicKey.value });
                     //console.log('公钥读取成功:', publicKeys); // 调试信息
 
                     // 创建消息对象
-                    const message = await openpgp.createMessage({ text: this.plaintext });
+                    const message = await openpgp.createMessage({ text: plaintext.value });
 
                     // 加密文本
                     const encryptedResult = await openpgp.encrypt({
@@ -78,12 +78,20 @@
                     //console.log('加密结果:', encryptedResult); // 调试信息
 
                     // 更新加密文本
-                    this.encryptedText = encryptedResult;
+                    encryptedText.value = encryptedResult;
                 } catch (error) {
                     console.error('加密失败:', error);
                     alert('加密失败，请检查公钥和输入的文本');
                 }
-            }
+            };
+
+            // 返回要暴露的变量和方法
+            return {
+                plaintext,
+                encryptedText,
+                publicKey,
+                encrypt
+            };
         }
     };
 </script>

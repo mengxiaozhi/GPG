@@ -40,6 +40,7 @@
 </template>
 
 <script>
+  import { ref } from 'vue';
   import * as openpgp from 'openpgp';
   import { NInput, NH1, NH5, NText, NButton, NDivider, NAlert } from 'naive-ui';
 
@@ -53,33 +54,45 @@
       NDivider,
       NAlert,
     },
-    data() {
-      return {
-        username: '',
-        email: '',
-        passphrase: '',
-        keyPair: null
-      };
-    },
-    methods: {
-      async generateKeyPair() {
+    setup() {
+      // 定义响应式变量
+      const username = ref('');
+      const email = ref('');
+      const passphrase = ref('');
+      const keyPair = ref(null);
+      const error = ref(''); // 用于存储错误信息
+
+      // 生成密钥对函数
+      const generateKeyPair = async () => {
         try {
           const { privateKey, publicKey } = await openpgp.generateKey({
-            userIDs: [{ name: this.username, email: this.email }],
+            userIDs: [{ name: username.value, email: email.value }],
             curve: 'ed25519',
-            passphrase: this.passphrase // 添加密码保护
+            passphrase: passphrase.value // 添加密码保护
           });
 
-          this.keyPair = {
+          keyPair.value = {
             publicKey,
             privateKey
           };
-        } catch (error) {
-          console.error('生成密钥对失败:', error);
+        } catch (err) {
+          console.error('生成密钥对失败:', err);
+          error.value = '生成密钥对失败，请检查输入的用户名、邮箱和密码。';
         }
-      }
+      };
+
+      // 返回要暴露的变量和方法
+      return {
+        username,
+        email,
+        passphrase,
+        keyPair,
+        error,
+        generateKeyPair
+      };
     }
   };
+
 </script>
 
 <style scoped>
