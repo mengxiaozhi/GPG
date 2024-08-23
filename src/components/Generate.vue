@@ -5,7 +5,7 @@
         生成密钥
       </n-text>
     </n-h1>
-    <n-alert title="Tips" type="default">
+    <n-alert title="Tips" type="warning">
       个人资料只用于生成密钥，以下资料不填也可以生成密钥。<br>
       密码如果没设定的话，密钥默认处于解锁状态，解密的时候不需要输入密码。（不太推荐）
     </n-alert>
@@ -32,9 +32,12 @@
         minRows: 3,
       }" />
       <n-h5>私钥:</n-h5>
-      <n-input v-model:value="keyPair.privateKey" type="textarea" readonly :autosize="{
-        minRows: 3,
-      }" />
+      <n-watermark content="私钥机密" cross selectable :font-size="18" :line-height="16" :width="192" :height="128"
+        :x-offset="12" :y-offset="28" :rotate="-15">
+        <n-input v-model:value="keyPair.privateKey" type="textarea" readonly :autosize="{
+          minRows: 3,
+        }" />
+      </n-watermark>
     </div>
   </div>
 </template>
@@ -42,7 +45,7 @@
 <script>
   import { ref } from 'vue';
   import * as openpgp from 'openpgp';
-  import { NInput, NH1, NH5, NText, NButton, NDivider, NAlert } from 'naive-ui';
+  import { NInput, NH1, NH5, NText, NButton, NDivider, NAlert, NWatermark, } from 'naive-ui';
 
   export default {
     components: {
@@ -53,6 +56,7 @@
       NButton,
       NDivider,
       NAlert,
+      NWatermark,
     },
     setup() {
       // 定义响应式变量
